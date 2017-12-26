@@ -302,7 +302,12 @@ func TestSchemaErrors(t *testing.T) {
 	err = MultipleOfMustBePositive("path", "body", float64(-10))
 	assert.Error(t, err)
 	assert.EqualValues(t, MultipleOfMustBePositiveCode, err.Code())
-	assert.Equal(t, `factor in path must be positive: -10`, err.Error())
+	assert.Equal(t, `factor MultipleOf declared for path must be positive: -10`, err.Error())
+
+	err = MultipleOfMustBePositive("path", "body", int64(-10))
+	assert.Error(t, err)
+	assert.EqualValues(t, MultipleOfMustBePositiveCode, err.Code())
+	assert.Equal(t, `factor MultipleOf declared for path must be positive: -10`, err.Error())
 
 	// func PropertyNotAllowed(name, in, key string) *Validation {
 	err = PropertyNotAllowed("path", "body", "key")
