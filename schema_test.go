@@ -273,6 +273,18 @@ func TestSchemaErrors(t *testing.T) {
 	assert.Equal(t, "something is required", err.Error())
 	assert.Equal(t, nil, err.Value)
 
+	err = ReadOnly("something", "query", nil)
+	assert.Error(t, err)
+	assert.EqualValues(t, ReadOnlyFailCode, err.Code())
+	assert.Equal(t, "something in query is readOnly", err.Error())
+	assert.Equal(t, nil, err.Value)
+
+	err = ReadOnly("something", "", nil)
+	assert.Error(t, err)
+	assert.EqualValues(t, ReadOnlyFailCode, err.Code())
+	assert.Equal(t, "something is readOnly", err.Error())
+	assert.Equal(t, nil, err.Value)
+
 	err = TooLong("something", "query", 5, "abcdef")
 	assert.Error(t, err)
 	assert.EqualValues(t, TooLongFailCode, err.Code())
