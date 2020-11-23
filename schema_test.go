@@ -351,7 +351,7 @@ func TestSchemaErrors(t *testing.T) {
 	assert.EqualValues(t, CompositeErrorCode, err2.Code())
 	assert.Equal(t, "validation failure list:\nfirst error\nsecond error", err2.Error())
 
-	//func MultipleOfMustBePositive(name, in string, factor interface{}) *Validation {
+	// func MultipleOfMustBePositive(name, in string, factor interface{}) *Validation {
 	err = MultipleOfMustBePositive("path", "body", float64(-10))
 	assert.Error(t, err)
 	assert.EqualValues(t, MultipleOfMustBePositiveCode, err.Code())
@@ -368,52 +368,52 @@ func TestSchemaErrors(t *testing.T) {
 	err = PropertyNotAllowed("path", "body", "key")
 	assert.Error(t, err)
 	assert.EqualValues(t, UnallowedPropertyCode, err.Code())
-	//unallowedProperty         = "%s.%s in %s is a forbidden property"
+	// unallowedProperty         = "%s.%s in %s is a forbidden property"
 	assert.Equal(t, "path.key in body is a forbidden property", err.Error())
 
 	err = PropertyNotAllowed("path", "", "key")
 	assert.Error(t, err)
 	assert.EqualValues(t, UnallowedPropertyCode, err.Code())
-	//unallowedPropertyNoIn     = "%s.%s is a forbidden property"
+	// unallowedPropertyNoIn     = "%s.%s is a forbidden property"
 	assert.Equal(t, "path.key is a forbidden property", err.Error())
 
-	//func TooManyProperties(name, in string, n int64) *Validation {
+	// func TooManyProperties(name, in string, n int64) *Validation {
 	err = TooManyProperties("path", "body", 10)
 	assert.Error(t, err)
 	assert.EqualValues(t, TooManyPropertiesCode, err.Code())
-	//tooManyProperties         = "%s in %s should have at most %d properties"
+	// tooManyProperties         = "%s in %s should have at most %d properties"
 	assert.Equal(t, "path in body should have at most 10 properties", err.Error())
 
 	err = TooManyProperties("path", "", 10)
 	assert.Error(t, err)
 	assert.EqualValues(t, TooManyPropertiesCode, err.Code())
-	//tooManyPropertiesNoIn     = "%s should have at most %d properties"
+	// tooManyPropertiesNoIn     = "%s should have at most %d properties"
 	assert.Equal(t, "path should have at most 10 properties", err.Error())
 
 	err = TooFewProperties("path", "body", 10)
 	// func TooFewProperties(name, in string, n int64) *Validation {
 	assert.Error(t, err)
 	assert.EqualValues(t, TooFewPropertiesCode, err.Code())
-	//tooFewProperties          = "%s in %s should have at least %d properties"
+	// tooFewProperties          = "%s in %s should have at least %d properties"
 	assert.Equal(t, "path in body should have at least 10 properties", err.Error())
 
 	err = TooFewProperties("path", "", 10)
 	// func TooFewProperties(name, in string, n int64) *Validation {
 	assert.Error(t, err)
 	assert.EqualValues(t, TooFewPropertiesCode, err.Code())
-	//tooFewPropertiesNoIn      = "%s should have at least %d properties"
+	// tooFewPropertiesNoIn      = "%s should have at least %d properties"
 	assert.Equal(t, "path should have at least 10 properties", err.Error())
 
-	//func FailedAllPatternProperties(name, in, key string) *Validation {
+	// func FailedAllPatternProperties(name, in, key string) *Validation {
 	err = FailedAllPatternProperties("path", "body", "key")
 	assert.Error(t, err)
 	assert.EqualValues(t, FailedAllPatternPropsCode, err.Code())
-	//failedAllPatternProps     = "%s.%s in %s failed all pattern properties"
+	// failedAllPatternProps     = "%s.%s in %s failed all pattern properties"
 	assert.Equal(t, "path.key in body failed all pattern properties", err.Error())
 
 	err = FailedAllPatternProperties("path", "", "key")
 	assert.Error(t, err)
 	assert.EqualValues(t, FailedAllPatternPropsCode, err.Code())
-	//failedAllPatternPropsNoIn = "%s.%s failed all pattern properties"
+	// failedAllPatternPropsNoIn = "%s.%s failed all pattern properties"
 	assert.Equal(t, "path.key failed all pattern properties", err.Error())
 }
