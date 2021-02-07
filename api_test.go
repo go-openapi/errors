@@ -18,9 +18,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type customError struct {
@@ -205,4 +207,45 @@ func TestValidateName(t *testing.T) {
 	vv = v.ValidateName("myNewName")
 	assert.EqualValues(t, "myNewName", vv.Name)
 	assert.EqualValues(t, "myNewNamemyMessage", vv.message)
+}
+
+func TestMarshalJSON(t *testing.T) {
+	const (
+		expectedCode = http.StatusUnsupportedMediaType
+		value        = "myValue"
+	)
+	list := []string{"a", "b"}
+
+	e := InvalidContentType(value, list)
+
+	jazon, err := e.MarshalJSON()
+	require.NoError(t, err)
+
+	expectedMessage := strings.ReplaceAll(fmt.Sprintf(contentTypeFail, value, list), `"`, `\"`)
+
+	expectedJSON := fmt.Sprintf(
+		`{"code":%d,"message":"%s","name":"Content-Type","in":"header","value":"%s","values":["a","b"]}`,
+		expectedCode, expectedMessage, value,
+	)
+	assert.JSONEq(t, expectedJSON, string(jazon))
+
+	a := apiError{code: 1, message: "a"}
+	jazon, err = a.MarshalJSON()
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"code":1,"message":"a"}`, string(jazon))
+
+	m := MethodNotAllowedError{code: 1, message: "a", Allowed: []string{"POST"}}
+	jazon, err = m.MarshalJSON()
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"code":1,"message":"a","allowed":["POST"]}`, string(jazon))
+
+	c := CompositeError{Errors: []error{e}, code: 1, message: "a"}
+	jazon, err = c.MarshalJSON()
+	require.NoError(t, err)
+	assert.JSONEq(t, fmt.Sprintf(`{"code":1,"message":"a","errors":[%s]}`, expectedJSON), string(jazon))
+
+	p := ParseError{code: 1, message: "x", Name: "a", In: "b", Value: "c", Reason: fmt.Errorf("d")}
+	jazon, err = p.MarshalJSON()
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"code":1,"message":"x","name":"a","in":"b","value":"c","reason":"d"}`, string(jazon))
 }
