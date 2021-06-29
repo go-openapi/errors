@@ -138,6 +138,17 @@ func CompositeValidationError(errors ...error) *CompositeError {
 	}
 }
 
+// ValidateName updates all Validation error message names for an aliased property
+func (c *CompositeError) ValidateName(name string) *CompositeError {
+	for _, e := range c.Errors {
+		if ve, ok := e.(*Validation); ok {
+			_ = ve.ValidateName(name)
+		}
+	}
+
+	return c
+}
+
 // FailedAllPatternProperties an error for when the property doesn't match a pattern
 func FailedAllPatternProperties(name, in, key string) *Validation {
 	msg := fmt.Sprintf(failedAllPatternProps, name, key, in)
