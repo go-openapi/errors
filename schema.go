@@ -138,11 +138,13 @@ func CompositeValidationError(errors ...error) *CompositeError {
 	}
 }
 
-// ValidateName updates all Validation error message names for an aliased property
+// ValidateName recursively sets the name for all validations or updates them for nested properties
 func (c *CompositeError) ValidateName(name string) *CompositeError {
-	for _, e := range c.Errors {
+	for i, e := range c.Errors {
 		if ve, ok := e.(*Validation); ok {
-			_ = ve.ValidateName(name)
+			c.Errors[i] = ve.ValidateName(name)
+		} else if ce, ok := e.(*CompositeError); ok {
+			c.Errors[i] = ce.ValidateName(name)
 		}
 	}
 
