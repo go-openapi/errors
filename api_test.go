@@ -191,12 +191,13 @@ func TestValidateName(t *testing.T) {
 	assert.EqualValues(t, "myValidation", vv.Name)
 	assert.EqualValues(t, "myMessage", vv.message)
 
-	// unchanged
+	// forced
 	vv = v.ValidateName("myNewName")
-	assert.EqualValues(t, "myValidation", vv.Name)
-	assert.EqualValues(t, "myMessage", vv.message)
+	assert.EqualValues(t, "myNewName.myValidation", vv.Name)
+	assert.EqualValues(t, "myNewName.myMessage", vv.message)
 
 	v.Name = ""
+	v.message = "myMessage"
 
 	// unchanged
 	vv = v.ValidateName("")
