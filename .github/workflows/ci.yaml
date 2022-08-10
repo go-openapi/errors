@@ -9,6 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
+        go: [1.18, 1.19]
       fail-fast: false
 
     steps:
@@ -17,12 +18,12 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.17.1
+        go-version: ${{ matrix.go }}
 
     - name: Setup gotestsum
       uses: autero1/action-gotestsum@v1.0.0
       with:
-        gotestsum_version: 1.7.0
+        gotestsum_version: 1.8.1
 
     - name: Test
       run: gotestsum --format short-verbose -- -race -timeout=20m -coverprofile=coverage_txt -covermode=atomic ./...
