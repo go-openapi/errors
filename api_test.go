@@ -148,37 +148,37 @@ func TestServeError(t *testing.T) {
 
 func TestAPIErrors(t *testing.T) {
 	err := New(402, "this failed %s", "yada")
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.EqualValues(t, 402, err.Code())
 	assert.EqualValues(t, "this failed yada", err.Error())
 
 	err = NotFound("this failed %d", 1)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.EqualValues(t, http.StatusNotFound, err.Code())
 	assert.EqualValues(t, "this failed 1", err.Error())
 
 	err = NotFound("")
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.EqualValues(t, http.StatusNotFound, err.Code())
 	assert.EqualValues(t, "Not found", err.Error())
 
 	err = NotImplemented("not implemented")
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.EqualValues(t, http.StatusNotImplemented, err.Code())
 	assert.EqualValues(t, "not implemented", err.Error())
 
 	err = MethodNotAllowed("GET", []string{"POST", "PUT"})
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.EqualValues(t, http.StatusMethodNotAllowed, err.Code())
 	assert.EqualValues(t, "method GET is not allowed, but [POST,PUT] are", err.Error())
 
 	err = InvalidContentType("application/saml", []string{"application/json", "application/x-yaml"})
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.EqualValues(t, http.StatusUnsupportedMediaType, err.Code())
 	assert.EqualValues(t, "unsupported media type \"application/saml\", only [application/json application/x-yaml] are allowed", err.Error())
 
 	err = InvalidResponseFormat("application/saml", []string{"application/json", "application/x-yaml"})
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.EqualValues(t, http.StatusNotAcceptable, err.Code())
 	assert.EqualValues(t, "unsupported media type requested, only [application/json application/x-yaml] are available", err.Error())
 }
