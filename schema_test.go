@@ -387,10 +387,30 @@ func TestSchemaErrors(t *testing.T) {
 		assert.EqualValues(t, CompositeErrorCode, err.Code())
 		assert.Equal(t, "validation failure list", err.Error())
 
-		err = CompositeValidationError(fmt.Errorf("first error"), fmt.Errorf("second error"))
+		testErr1 := fmt.Errorf("first error")
+		testErr2 := fmt.Errorf("second error")
+		err = CompositeValidationError(testErr1, testErr2)
 		require.Error(t, err)
 		assert.EqualValues(t, CompositeErrorCode, err.Code())
 		assert.Equal(t, "validation failure list:\nfirst error\nsecond error", err.Error())
+
+		require.ErrorIs(t, err, testErr1)
+		require.ErrorIs(t, err, testErr2)
+	})
+
+	t.Run("should set validation name in CompositeValidation error", func(t *testing.T) {
+		err := CompositeValidationError(
+			InvalidContentType("text/html", []string{"application/json"}),
+			CompositeValidationError(
+				InvalidTypeName("y"),
+			),
+		)
+		_ = err.ValidateName("new-name")
+		const expectedMessage = `validation failure list:
+new-name.unsupported media type "text/html", only [application/json] are allowed
+validation failure list:
+new-namey is an invalid type name`
+		assert.Equal(t, expectedMessage, err.Error())
 	})
 
 	t.Run("with PropertyNotAllowed", func(t *testing.T) {
