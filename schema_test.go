@@ -16,7 +16,6 @@ package errors
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -248,7 +247,7 @@ func TestSchemaErrors(t *testing.T) {
 		require.Error(t, err)
 		assert.EqualValues(t, MultipleOfFailCode, err.Code())
 		assert.Equal(t, "something in query should be a multiple of 5", err.Error())
-		assert.Equal(t, float64(1), err.Value)
+		assert.InDelta(t, float64(1), err.Value, 1e-6)
 
 		err = NotMultipleOf("something", "query", uint64(5), uint64(1))
 		require.Error(t, err)
@@ -266,7 +265,7 @@ func TestSchemaErrors(t *testing.T) {
 		require.Error(t, err)
 		assert.EqualValues(t, MultipleOfMustBePositiveCode, err.Code())
 		assert.Equal(t, `factor MultipleOf declared for path must be positive: -10`, err.Error())
-		assert.Equal(t, float64(-10), err.Value)
+		assert.InDelta(t, float64(-10), err.Value, 1e-6)
 
 		err = MultipleOfMustBePositive("path", "body", int64(-10))
 		require.Error(t, err)
@@ -294,13 +293,13 @@ func TestSchemaErrors(t *testing.T) {
 		require.Error(t, err)
 		assert.EqualValues(t, RequiredFailCode, err.Code())
 		assert.Equal(t, "something in query is required", err.Error())
-		assert.Equal(t, nil, err.Value)
+		assert.Nil(t, err.Value)
 
 		err = Required("something", "", nil)
 		require.Error(t, err)
 		assert.EqualValues(t, RequiredFailCode, err.Code())
 		assert.Equal(t, "something is required", err.Error())
-		assert.Equal(t, nil, err.Value)
+		assert.Nil(t, err.Value)
 	})
 
 	t.Run("with ReadOnly", func(t *testing.T) {
@@ -308,13 +307,13 @@ func TestSchemaErrors(t *testing.T) {
 		require.Error(t, err)
 		assert.EqualValues(t, ReadOnlyFailCode, err.Code())
 		assert.Equal(t, "something in query is readOnly", err.Error())
-		assert.Equal(t, nil, err.Value)
+		assert.Nil(t, err.Value)
 
 		err = ReadOnly("something", "", nil)
 		require.Error(t, err)
 		assert.EqualValues(t, ReadOnlyFailCode, err.Code())
 		assert.Equal(t, "something is readOnly", err.Error())
-		assert.Equal(t, nil, err.Value)
+		assert.Nil(t, err.Value)
 	})
 
 	t.Run("with TooLong/TooShort", func(t *testing.T) {
@@ -387,8 +386,8 @@ func TestSchemaErrors(t *testing.T) {
 		assert.EqualValues(t, CompositeErrorCode, err.Code())
 		assert.Equal(t, "validation failure list", err.Error())
 
-		testErr1 := fmt.Errorf("first error")
-		testErr2 := fmt.Errorf("second error")
+		testErr1 := errors.New("first error")
+		testErr2 := errors.New("second error")
 		err = CompositeValidationError(testErr1, testErr2)
 		require.Error(t, err)
 		assert.EqualValues(t, CompositeErrorCode, err.Code())
