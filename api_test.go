@@ -15,6 +15,7 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -71,7 +72,7 @@ func TestServeError(t *testing.T) {
 	}()
 
 	// defaults to internal server error
-	simpleErr := fmt.Errorf("some error")
+	simpleErr := errors.New("some error")
 	recorder = httptest.NewRecorder()
 	ServeError(recorder, nil, simpleErr)
 	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -83,8 +84,8 @@ func TestServeError(t *testing.T) {
 	// unrecognized: return internal error with first error only - the second error is ignored
 	compositeErr := &CompositeError{
 		Errors: []error{
-			fmt.Errorf("firstError"),
-			fmt.Errorf("anotherError"),
+			errors.New("firstError"),
+			errors.New("anotherError"),
 		},
 	}
 	recorder = httptest.NewRecorder()
@@ -245,7 +246,7 @@ func TestMarshalJSON(t *testing.T) {
 	require.NoError(t, err)
 	assert.JSONEq(t, fmt.Sprintf(`{"code":1,"message":"a","errors":[%s]}`, expectedJSON), string(jazon))
 
-	p := ParseError{code: 1, message: "x", Name: "a", In: "b", Value: "c", Reason: fmt.Errorf("d")}
+	p := ParseError{code: 1, message: "x", Name: "a", In: "b", Value: "c", Reason: errors.New("d")}
 	jazon, err = p.MarshalJSON()
 	require.NoError(t, err)
 	assert.JSONEq(t, `{"code":1,"message":"x","name":"a","in":"b","value":"c","reason":"d"}`, string(jazon))
