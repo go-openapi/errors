@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//nolint:err113
 package errors
 
 import (
@@ -31,120 +32,175 @@ type customError struct {
 }
 
 func TestServeError(t *testing.T) {
-	// method not allowed wins
-	// err abides by the Error interface
-	err := MethodNotAllowed("GET", []string{"POST", "PUT"})
-	recorder := httptest.NewRecorder()
-	ServeError(recorder, nil, err)
-	assert.Equal(t, http.StatusMethodNotAllowed, recorder.Code)
-	assert.Equal(t, "POST,PUT", recorder.Header().Get("Allow"))
-	// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
-	assert.Equal(t, `{"code":405,"message":"method GET is not allowed, but [POST,PUT] are"}`, recorder.Body.String())
+	t.Run("method not allowed wins", func(t *testing.T) {
+		// err abides by the Error interface
+		err := MethodNotAllowed("GET", []string{"POST", "PUT"})
+		require.Error(t, err)
 
-	// renders status code from error when present
-	err = NotFound("")
-	recorder = httptest.NewRecorder()
-	ServeError(recorder, nil, err)
-	assert.Equal(t, http.StatusNotFound, recorder.Code)
-	// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
-	assert.Equal(t, `{"code":404,"message":"Not found"}`, recorder.Body.String())
-
-	// renders mapped status code from error when present
-	err = InvalidTypeName("someType")
-	recorder = httptest.NewRecorder()
-	ServeError(recorder, nil, err)
-	assert.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
-	// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
-	assert.Equal(t, `{"code":601,"message":"someType is an invalid type name"}`, recorder.Body.String())
-
-	// same, but override DefaultHTTPCode
-	func() {
-		oldDefaultHTTPCode := DefaultHTTPCode
-		defer func() { DefaultHTTPCode = oldDefaultHTTPCode }()
-		DefaultHTTPCode = http.StatusBadRequest
-
-		err = InvalidTypeName("someType")
-		recorder = httptest.NewRecorder()
+		recorder := httptest.NewRecorder()
 		ServeError(recorder, nil, err)
-		assert.Equal(t, http.StatusBadRequest, recorder.Code)
+		assert.Equal(t, http.StatusMethodNotAllowed, recorder.Code)
+		assert.Equal(t, "POST,PUT", recorder.Header().Get("Allow"))
 		// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
-		assert.Equal(t, `{"code":601,"message":"someType is an invalid type name"}`, recorder.Body.String())
-	}()
+		assert.JSONEq(t,
+			`{"code":405,"message":"method GET is not allowed, but [POST,PUT] are"}`,
+			recorder.Body.String(),
+		)
+	})
 
-	// defaults to internal server error
-	simpleErr := errors.New("some error")
-	recorder = httptest.NewRecorder()
-	ServeError(recorder, nil, simpleErr)
-	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-	// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
-	assert.Equal(t, `{"code":500,"message":"some error"}`, recorder.Body.String())
+	t.Run("renders status code from error", func(t *testing.T) {
+		err := NotFound("")
+		require.Error(t, err)
 
-	// composite errors
+		recorder := httptest.NewRecorder()
+		ServeError(recorder, nil, err)
+		assert.Equal(t, http.StatusNotFound, recorder.Code)
+		// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
+		assert.JSONEq(t,
+			`{"code":404,"message":"Not found"}`,
+			recorder.Body.String(),
+		)
+	})
 
-	// unrecognized: return internal error with first error only - the second error is ignored
-	compositeErr := &CompositeError{
-		Errors: []error{
-			errors.New("firstError"),
-			errors.New("anotherError"),
-		},
-	}
-	recorder = httptest.NewRecorder()
-	ServeError(recorder, nil, compositeErr)
-	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-	assert.Equal(t, `{"code":500,"message":"firstError"}`, recorder.Body.String())
+	t.Run("renders mapped status code from error", func(t *testing.T) {
+		// renders mapped status code from error when present
+		err := InvalidTypeName("someType")
+		require.Error(t, err)
 
-	// recognized: return internal error with first error only - the second error is ignored
-	compositeErr = &CompositeError{
-		Errors: []error{
-			New(600, "myApiError"),
-			New(601, "myOtherApiError"),
-		},
-	}
-	recorder = httptest.NewRecorder()
-	ServeError(recorder, nil, compositeErr)
-	assert.Equal(t, CompositeErrorCode, recorder.Code)
-	assert.Equal(t, `{"code":600,"message":"myApiError"}`, recorder.Body.String())
+		recorder := httptest.NewRecorder()
+		ServeError(recorder, nil, err)
+		assert.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
+		// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
+		assert.JSONEq(t,
+			`{"code":601,"message":"someType is an invalid type name"}`,
+			recorder.Body.String(),
+		)
+	})
 
-	// recognized API Error, flattened
-	compositeErr = &CompositeError{
-		Errors: []error{
-			&CompositeError{
+	t.Run("overrides DefaultHTTPCode", func(t *testing.T) {
+		func() {
+			oldDefaultHTTPCode := DefaultHTTPCode
+			defer func() { DefaultHTTPCode = oldDefaultHTTPCode }()
+			DefaultHTTPCode = http.StatusBadRequest
+
+			err := InvalidTypeName("someType")
+			require.Error(t, err)
+
+			recorder := httptest.NewRecorder()
+			ServeError(recorder, nil, err)
+			assert.Equal(t, http.StatusBadRequest, recorder.Code)
+			// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
+			assert.JSONEq(t,
+				`{"code":601,"message":"someType is an invalid type name"}`,
+				recorder.Body.String(),
+			)
+		}()
+	})
+
+	t.Run("defaults to internal server error", func(t *testing.T) {
+		simpleErr := errors.New("some error")
+		recorder := httptest.NewRecorder()
+		ServeError(recorder, nil, simpleErr)
+		assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+		// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
+		assert.JSONEq(t,
+			`{"code":500,"message":"some error"}`,
+			recorder.Body.String(),
+		)
+	})
+
+	t.Run("with composite erors", func(t *testing.T) {
+		t.Run("unrecognized - return internal error with first error only - the second error is ignored", func(t *testing.T) {
+			compositeErr := &CompositeError{
+				Errors: []error{
+					errors.New("firstError"),
+					errors.New("anotherError"),
+				},
+			}
+			recorder := httptest.NewRecorder()
+			ServeError(recorder, nil, compositeErr)
+			assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+			assert.JSONEq(t,
+				`{"code":500,"message":"firstError"}`,
+				recorder.Body.String(),
+			)
+		})
+
+		t.Run("recognized - return internal error with first error only - the second error is ignored", func(t *testing.T) {
+			compositeErr := &CompositeError{
 				Errors: []error{
 					New(600, "myApiError"),
 					New(601, "myOtherApiError"),
 				},
-			},
-		},
-	}
-	recorder = httptest.NewRecorder()
-	ServeError(recorder, nil, compositeErr)
-	assert.Equal(t, CompositeErrorCode, recorder.Code)
-	assert.Equal(t, `{"code":600,"message":"myApiError"}`, recorder.Body.String())
+			}
+			recorder := httptest.NewRecorder()
+			ServeError(recorder, nil, compositeErr)
+			assert.Equal(t, CompositeErrorCode, recorder.Code)
+			assert.JSONEq(t,
+				`{"code":600,"message":"myApiError"}`,
+				recorder.Body.String(),
+			)
+		})
 
-	// check guard against empty CompositeError (e.g. nil Error interface)
-	compositeErr = &CompositeError{
-		Errors: []error{
-			&CompositeError{
-				Errors: []error{},
-			},
-		},
-	}
-	recorder = httptest.NewRecorder()
-	ServeError(recorder, nil, compositeErr)
-	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-	assert.Equal(t, `{"code":500,"message":"Unknown error"}`, recorder.Body.String())
+		t.Run("recognized API Error, flattened", func(t *testing.T) {
+			compositeErr := &CompositeError{
+				Errors: []error{
+					&CompositeError{
+						Errors: []error{
+							New(600, "myApiError"),
+							New(601, "myOtherApiError"),
+						},
+					},
+				},
+			}
+			recorder := httptest.NewRecorder()
+			ServeError(recorder, nil, compositeErr)
+			assert.Equal(t, CompositeErrorCode, recorder.Code)
+			assert.JSONEq(t,
+				`{"code":600,"message":"myApiError"}`,
+				recorder.Body.String(),
+			)
+		})
 
-	// check guard against nil type
-	recorder = httptest.NewRecorder()
-	ServeError(recorder, nil, nil)
-	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-	assert.Equal(t, `{"code":500,"message":"Unknown error"}`, recorder.Body.String())
+		// (e.g. nil Error interface)
+		t.Run("check guard against empty CompositeError", func(t *testing.T) {
+			compositeErr := &CompositeError{
+				Errors: []error{
+					&CompositeError{
+						Errors: []error{},
+					},
+				},
+			}
+			recorder := httptest.NewRecorder()
+			ServeError(recorder, nil, compositeErr)
+			assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+			assert.JSONEq(t,
+				`{"code":500,"message":"Unknown error"}`,
+				recorder.Body.String(),
+			)
+		})
 
-	recorder = httptest.NewRecorder()
-	var z *customError
-	ServeError(recorder, nil, z)
-	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-	assert.Equal(t, `{"code":500,"message":"Unknown error"}`, recorder.Body.String())
+		t.Run("check guard against nil type", func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			ServeError(recorder, nil, nil)
+			assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+			assert.JSONEq(t,
+				`{"code":500,"message":"Unknown error"}`,
+				recorder.Body.String(),
+			)
+		})
+
+		t.Run("check guard against nil value", func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			var z *customError
+			ServeError(recorder, nil, z)
+			assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+			assert.JSONEq(t,
+				`{"code":500,"message":"Unknown error"}`,
+				recorder.Body.String(),
+			)
+		})
+	})
 }
 
 func TestAPIErrors(t *testing.T) {
