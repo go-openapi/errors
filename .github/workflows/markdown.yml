@@ -3,7 +3,7 @@ name: Markdown
 on:
   pull_request:
     paths:
-    - **/*.md
+    - '**/*.md'
 
 permissions:
   pull-requests: read
