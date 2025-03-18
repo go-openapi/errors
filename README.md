@@ -6,3 +6,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-openapi/errors)](https://goreportcard.com/report/github.com/go-openapi/errors)
 
 Shared errors and error interface used throughout the various libraries found in the go-openapi toolkit.
+
+
+# blah blah

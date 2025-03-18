@@ -1,0 +1,5 @@
+Evaluate:
+
+* misspell
+* spellcheck
+* govulncheck
