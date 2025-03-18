@@ -1,0 +1,35 @@
+name: Markdown
+
+on:
+  pull_request:
+
+on:
+  pull_request:
+    paths:
+    - **/*.md
+
+permissions:
+  pull-requests: read
+
+jobs:
+  lint-markdown:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v4
+
+    - name: Run linter
+      id: markdownlint
+      uses: docker://avtodev/markdown-lint:v1
+      with:
+        config: .markdownlint.yaml
+        args: '**/*.md'
+        output: ./markdownlint.txt
+
+    - name: Create Issue From File
+      if: steps.markdownlint.outputs.exit_code != 0
+      uses: peter-evans/create-issue-from-file@v5
+      with:
+        title: Markdown Lint Report
+        content-filepath: ./markdownlint.txt
+        labels: report, bot-generated
