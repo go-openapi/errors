@@ -1,0 +1,36 @@
+name: Markdown
+
+on:
+  pull_request_target:
+    paths:
+    - '**/*.md'
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  lint-markdown:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v4
+
+    - name: Run markdown linter
+      id: markdownlint
+      #continue-on-error: true
+      uses: docker://avtodev/markdown-lint:v1
+      with:
+        config: .markdownlint.yml
+        args: '**/*.md'
+        output: ./markdownlint.txt
+
+    - name: Create PR comment
+      if: ${{ failure() && steps.markdownlint.outcome == 'failure' }}
+      #if: steps.markdownlint.outputs.exit_code != 0
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        title: Markdown Lint Report
+        body-path: ./markdownlint.txt
+        labels: report, bot-generated
