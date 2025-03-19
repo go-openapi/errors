@@ -10,14 +10,14 @@ permissions:
   contents: read
 
 jobs:
-
-  lint-markdown:
-    runs-on: ubuntu-latest
+  markdown-changed:
+    outputs:
+      proceed: ${ steps.changed-markdown-files.outputs.any_changed }
     steps:
     - name: Checkout Repo
       uses: actions/checkout@v4
 
-    - name: Get all changed markdown files
+    - name: Get changed markdown files
       id: changed-markdown-files
       uses: tj-actions/changed-files@v45
       with:
@@ -25,44 +25,78 @@ jobs:
         files: |
           **/*.md
 
-    - name: "DEBUG List all changed files markdown files"
-      if: steps.changed-markdown-files.outputs.any_changed == 'true'
-      env:
-        ALL_CHANGED_FILES: 
-      run: |
-        for file in ${ALL_CHANGED_FILES}; do
-          echo "$file was changed"
-        done
+  lint-markdown:
+    needs: markdown-changed
+    if: needs.markdown-changed.outputs.proceed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      lintreport: "./report.txt"
+    outputs:
+      proceed: ${{ steps.report-exists.proceed }}
+      report: ${{ steps.report-exists.report }}
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v4
 
     - name: Run markdown linter
+      if: steps.changed-markdown-files.outputs.any_changed == 'true'
+      continue-on-error: true
       id: markdownlint
       uses: docker://avtodev/markdown-lint:v1
       with:
         config: .markdownlint.yml
         args: '${{ steps.changed-markdown-files.outputs.all_changed_files }}'
-        output: ./lintreport.txt
+        output: ${{ env.lintreport }}
 
-    - name: Retrieve report as a variable
-      if: ${{ failure() && steps.markdownlint.outcome == 'failure' }}
-      id: conveyor
+    - name: Comment on success
+      if: ${{ success() }}
+      id: congrats
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          Markdown looks good to me. Congrats!
+
+    - name: Check lint report exists
+      if: ${{ failure() && steps.markdownlint.outcome == 'failure' && hashFiles(env.lintreport) != "" }}
+      id: report-exist
       run: |
-        echo "::set-output name=text::$(cat ./lintreport.txt)"
+        echo "proceed=true" >> $GITHUB_OUTPUT
+        echo "report=$(cat ${{ env.lintreport }})" >> $GITHUB_OUTPUT
 
+  pr-comment:
+    needs: lint-markdown
+    if: ${{ needs.lint-markdown.proceed == 'true' && needs.lint-markdown.report != '' }}
+    env:
+      comment-title: Markdown linting issues detected in modified files
+
+    steps:
     - name: Format PR comment
-      if: ${{ failure() && steps.markdownlint.outcome == 'failure' }}
       id: commentformatter
       uses: skills/action-text-variables@v1
       with:
         template-vars: |
-            text=$${{ steps.conveyor.outputs.text }}
+            text=${{ steps.conveyor.outputs.report }}
         template-text: |
-            ## Markdown linting issues detected in modified files
+            ### ${{ env.comment-title }}
+            This check is advisory and is not blocking. Please adopt a nice markdown style.
+
+            Markdown rules formatting rules are documented [here](https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md).
             
             {{ text }}
 
-    - name: Create PR comment
-      if: ${{ failure() && steps.markdownlint.outcome == 'failure' }}
+    - name: Find previous PR comment
+      uses: peter-evans/find-comment@v3
+      id: findcomment
+      with:
+        issue-number:  ${{ github.event.pull_request.number }}
+        body-includes: ${{ steps.conveyor.outputs.report }}
+        direction: last
+
+    - name: Create or update PR comment
       uses: peter-evans/create-or-update-comment@v4
       with:
         issue-number: ${{ github.event.pull_request.number }}
-        body: $${{ steps.commentformatter.outputs.updated-text }}
+        comment-id: ${{ steps.findcomment.outputs.comment-id }}
+        body: ${{ steps.commentformatter.outputs.updated-text }}
