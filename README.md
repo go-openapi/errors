@@ -8,4 +8,6 @@
 Shared errors and error interface used throughout the various libraries found in the go-openapi toolkit.
 
 
-# blah blah
+## blah blah
+
+# should raise an issue
