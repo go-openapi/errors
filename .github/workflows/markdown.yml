@@ -1,11 +1,13 @@
 name: Markdown
 
 on:
-  pull_request:
+  pull_request_target:
     paths:
     - '**/*.md'
 
-permissions: read-all
+permissions:
+  pull-requests: write
+  contents: read
 
 jobs:
   lint-markdown:
@@ -23,11 +25,12 @@ jobs:
         args: '**/*.md'
         output: ./markdownlint.txt
 
-    - name: Create Issue From File
+    - name: Create PR comment
       if: ${{ failure() && steps.markdownlint.outcome == 'failure' }}
       #if: steps.markdownlint.outputs.exit_code != 0
-      uses: peter-evans/create-issue-from-file@v5
+      uses: peter-evans/create-or-update-comment@v4
       with:
+        issue-number: ${{ github.event.pull_request.number }}
         title: Markdown Lint Report
-        content-filepath: ./markdownlint.txt
+        body-path: ./markdownlint.txt
         labels: report, bot-generated
