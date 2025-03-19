@@ -6,7 +6,8 @@ on:
     - '**/*.md'
 
 permissions:
-  pull-requests: read
+  contents: read
+  pull-requests: write
 
 jobs:
   lint-markdown:
