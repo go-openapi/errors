@@ -31,6 +31,4 @@ jobs:
       uses: peter-evans/create-or-update-comment@v4
       with:
         issue-number: ${{ github.event.pull_request.number }}
-        title: Markdown Lint Report
         body-path: ./markdownlint.txt
-        labels: report, bot-generated
