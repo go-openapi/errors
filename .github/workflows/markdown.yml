@@ -15,16 +15,18 @@ jobs:
     - name: Checkout Repo
       uses: actions/checkout@v4
 
-    - name: Run linter
+    - name: Run markdown linter
       id: markdownlint
+      #continue-on-error: true
       uses: docker://avtodev/markdown-lint:v1
       with:
-        config: .markdownlint.yaml
+        config: .markdownlint.yml
         args: '**/*.md'
         output: ./markdownlint.txt
 
     - name: Create Issue From File
-      if: steps.markdownlint.outputs.exit_code != 0
+      if: ${{ failure() && steps.markdownlint.outcome == 'failure' }}
+      #if: steps.markdownlint.outputs.exit_code != 0
       uses: peter-evans/create-issue-from-file@v5
       with:
         title: Markdown Lint Report
