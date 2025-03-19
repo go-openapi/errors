@@ -10,25 +10,59 @@ permissions:
   contents: read
 
 jobs:
+
   lint-markdown:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repo
       uses: actions/checkout@v4
 
+    - name: Get all changed markdown files
+      id: changed-markdown-files
+      uses: tj-actions/changed-files@v45
+      with:
+        # Avoid using single or double quotes for multiline patterns
+        files: |
+          **/*.md
+
+    - name: "DEBUG List all changed files markdown files"
+      if: steps.changed-markdown-files.outputs.any_changed == 'true'
+      env:
+        ALL_CHANGED_FILES: 
+      run: |
+        for file in ${ALL_CHANGED_FILES}; do
+          echo "$file was changed"
+        done
+
     - name: Run markdown linter
       id: markdownlint
-      #continue-on-error: true
       uses: docker://avtodev/markdown-lint:v1
       with:
         config: .markdownlint.yml
-        args: '**/*.md'
-        output: ./markdownlint.txt
+        args: '${{ steps.changed-markdown-files.outputs.all_changed_files }}'
+        output: ./lintreport.txt
+
+    - name: Retrieve report as a variable
+      if: ${{ failure() && steps.markdownlint.outcome == 'failure' }}
+      id: conveyor
+      run: |
+        echo "::set-output name=text::$(cat ./lintreport.txt)"
+
+    - name: Format PR comment
+      if: ${{ failure() && steps.markdownlint.outcome == 'failure' }}
+      id: commentformatter
+      uses: skills/action-text-variables@v1
+      with:
+        template-vars: |
+            text=$${{ steps.conveyor.outputs.text }}
+        template-text: |
+            ## Markdown linting issues detected in modified files
+            
+            {{ text }}
 
     - name: Create PR comment
       if: ${{ failure() && steps.markdownlint.outcome == 'failure' }}
-      #if: steps.markdownlint.outputs.exit_code != 0
       uses: peter-evans/create-or-update-comment@v4
       with:
         issue-number: ${{ github.event.pull_request.number }}
-        body-path: ./markdownlint.txt
+        body: $${{ steps.commentformatter.outputs.updated-text }}

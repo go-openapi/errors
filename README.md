@@ -11,3 +11,5 @@ Shared errors and error interface used throughout the various libraries found in
 ## blah blah
 
 # should raise an issue
+
+# should raise another issue
