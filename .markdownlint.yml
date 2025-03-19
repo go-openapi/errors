@@ -1,8 +1,10 @@
+# See rules documentation: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
 # Default state for all rules
 default: true
 
-# ul-style
-MD004: false
+# ul-style # default: consistent
+# MD004: false
 
 # hard-tabs
 MD010: false
@@ -15,7 +17,7 @@ MD024:
   siblings_only: true
 
 #single-title
-MD025: false
+#MD025: false
 
 # ol-prefix
 MD029:
