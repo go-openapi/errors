@@ -207,37 +207,37 @@ func TestAPIErrors(t *testing.T) {
 	err := New(402, "this failed %s", "yada")
 	require.Error(t, err)
 	assert.EqualValues(t, 402, err.Code())
-	assert.EqualValues(t, "this failed yada", err.Error())
+	assert.Equal(t, "this failed yada", err.Error())
 
 	err = NotFound("this failed %d", 1)
 	require.Error(t, err)
 	assert.EqualValues(t, http.StatusNotFound, err.Code())
-	assert.EqualValues(t, "this failed 1", err.Error())
+	assert.Equal(t, "this failed 1", err.Error())
 
 	err = NotFound("")
 	require.Error(t, err)
 	assert.EqualValues(t, http.StatusNotFound, err.Code())
-	assert.EqualValues(t, "Not found", err.Error())
+	assert.Equal(t, "Not found", err.Error())
 
 	err = NotImplemented("not implemented")
 	require.Error(t, err)
 	assert.EqualValues(t, http.StatusNotImplemented, err.Code())
-	assert.EqualValues(t, "not implemented", err.Error())
+	assert.Equal(t, "not implemented", err.Error())
 
 	err = MethodNotAllowed("GET", []string{"POST", "PUT"})
 	require.Error(t, err)
 	assert.EqualValues(t, http.StatusMethodNotAllowed, err.Code())
-	assert.EqualValues(t, "method GET is not allowed, but [POST,PUT] are", err.Error())
+	assert.Equal(t, "method GET is not allowed, but [POST,PUT] are", err.Error())
 
 	err = InvalidContentType("application/saml", []string{"application/json", "application/x-yaml"})
 	require.Error(t, err)
 	assert.EqualValues(t, http.StatusUnsupportedMediaType, err.Code())
-	assert.EqualValues(t, "unsupported media type \"application/saml\", only [application/json application/x-yaml] are allowed", err.Error())
+	assert.Equal(t, "unsupported media type \"application/saml\", only [application/json application/x-yaml] are allowed", err.Error())
 
 	err = InvalidResponseFormat("application/saml", []string{"application/json", "application/x-yaml"})
 	require.Error(t, err)
 	assert.EqualValues(t, http.StatusNotAcceptable, err.Code())
-	assert.EqualValues(t, "unsupported media type requested, only [application/json application/x-yaml] are available", err.Error())
+	assert.Equal(t, "unsupported media type requested, only [application/json application/x-yaml] are available", err.Error())
 }
 
 func TestValidateName(t *testing.T) {
@@ -245,26 +245,26 @@ func TestValidateName(t *testing.T) {
 
 	// unchanged
 	vv := v.ValidateName("")
-	assert.EqualValues(t, "myValidation", vv.Name)
-	assert.EqualValues(t, "myMessage", vv.message)
+	assert.Equal(t, "myValidation", vv.Name)
+	assert.Equal(t, "myMessage", vv.message)
 
 	// forced
 	vv = v.ValidateName("myNewName")
-	assert.EqualValues(t, "myNewName.myValidation", vv.Name)
-	assert.EqualValues(t, "myNewName.myMessage", vv.message)
+	assert.Equal(t, "myNewName.myValidation", vv.Name)
+	assert.Equal(t, "myNewName.myMessage", vv.message)
 
 	v.Name = ""
 	v.message = "myMessage"
 
 	// unchanged
 	vv = v.ValidateName("")
-	assert.EqualValues(t, "", vv.Name)
-	assert.EqualValues(t, "myMessage", vv.message)
+	assert.Empty(t, vv.Name)
+	assert.Equal(t, "myMessage", vv.message)
 
 	// forced
 	vv = v.ValidateName("myNewName")
-	assert.EqualValues(t, "myNewName", vv.Name)
-	assert.EqualValues(t, "myNewNamemyMessage", vv.message)
+	assert.Equal(t, "myNewName", vv.Name)
+	assert.Equal(t, "myNewNamemyMessage", vv.message)
 }
 
 func TestMarshalJSON(t *testing.T) {
