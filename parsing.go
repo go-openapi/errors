@@ -52,7 +52,7 @@ func (e ParseError) MarshalJSON() ([]byte, error) {
 	if e.Reason != nil {
 		reason = e.Reason.Error()
 	}
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"code":    e.code,
 		"message": e.message,
 		"in":      e.In,

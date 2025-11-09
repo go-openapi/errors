@@ -35,14 +35,14 @@ func (a *apiError) Code() int32 {
 
 // MarshalJSON implements the JSON encoding interface
 func (a apiError) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"code":    a.code,
 		"message": a.message,
 	})
 }
 
 // New creates a new API error with a code and a message
-func New(code int32, message string, args ...interface{}) Error {
+func New(code int32, message string, args ...any) Error {
 	if len(args) > 0 {
 		return &apiError{
 			code:    code,
@@ -56,7 +56,7 @@ func New(code int32, message string, args ...interface{}) Error {
 }
 
 // NotFound creates a new not found error
-func NotFound(message string, args ...interface{}) Error {
+func NotFound(message string, args ...any) Error {
 	if message == "" {
 		message = "Not found"
 	}
@@ -86,7 +86,7 @@ func (m *MethodNotAllowedError) Code() int32 {
 
 // MarshalJSON implements the JSON encoding interface
 func (m MethodNotAllowedError) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"code":    m.code,
 		"message": m.message,
 		"allowed": m.Allowed,

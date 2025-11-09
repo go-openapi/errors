@@ -119,7 +119,7 @@ func (c *CompositeError) Unwrap() []error {
 
 // MarshalJSON implements the JSON encoding interface
 func (c CompositeError) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"code":    c.code,
 		"message": c.message,
 		"errors":  c.Errors,
@@ -243,7 +243,7 @@ func InvalidTypeName(typeName string) *Validation {
 }
 
 // InvalidType creates an error for when the type is invalid
-func InvalidType(name, in, typeName string, value interface{}) *Validation {
+func InvalidType(name, in, typeName string, value any) *Validation {
 	var message string
 
 	if in != "" {
@@ -291,7 +291,7 @@ func DuplicateItems(name, in string) *Validation {
 }
 
 // TooManyItems error for when an array contains too many items
-func TooManyItems(name, in string, maximum int64, value interface{}) *Validation {
+func TooManyItems(name, in string, maximum int64, value any) *Validation {
 	msg := fmt.Sprintf(maximumItemsFail, name, in, maximum)
 	if in == "" {
 		msg = fmt.Sprintf(maximumItemsFailNoIn, name, maximum)
@@ -307,7 +307,7 @@ func TooManyItems(name, in string, maximum int64, value interface{}) *Validation
 }
 
 // TooFewItems error for when an array contains too few items
-func TooFewItems(name, in string, minimum int64, value interface{}) *Validation {
+func TooFewItems(name, in string, minimum int64, value any) *Validation {
 	msg := fmt.Sprintf(minItemsFail, name, in, minimum)
 	if in == "" {
 		msg = fmt.Sprintf(minItemsFailNoIn, name, minimum)
@@ -322,7 +322,7 @@ func TooFewItems(name, in string, minimum int64, value interface{}) *Validation 
 }
 
 // ExceedsMaximumInt error for when maximumimum validation fails
-func ExceedsMaximumInt(name, in string, maximum int64, exclusive bool, value interface{}) *Validation {
+func ExceedsMaximumInt(name, in string, maximum int64, exclusive bool, value any) *Validation {
 	var message string
 	if in == "" {
 		m := maximumIncFailNoIn
@@ -347,7 +347,7 @@ func ExceedsMaximumInt(name, in string, maximum int64, exclusive bool, value int
 }
 
 // ExceedsMaximumUint error for when maximumimum validation fails
-func ExceedsMaximumUint(name, in string, maximum uint64, exclusive bool, value interface{}) *Validation {
+func ExceedsMaximumUint(name, in string, maximum uint64, exclusive bool, value any) *Validation {
 	var message string
 	if in == "" {
 		m := maximumIncFailNoIn
@@ -372,7 +372,7 @@ func ExceedsMaximumUint(name, in string, maximum uint64, exclusive bool, value i
 }
 
 // ExceedsMaximum error for when maximumimum validation fails
-func ExceedsMaximum(name, in string, maximum float64, exclusive bool, value interface{}) *Validation {
+func ExceedsMaximum(name, in string, maximum float64, exclusive bool, value any) *Validation {
 	var message string
 	if in == "" {
 		m := maximumIncFailNoIn
@@ -397,7 +397,7 @@ func ExceedsMaximum(name, in string, maximum float64, exclusive bool, value inte
 }
 
 // ExceedsMinimumInt error for when minimum validation fails
-func ExceedsMinimumInt(name, in string, minimum int64, exclusive bool, value interface{}) *Validation {
+func ExceedsMinimumInt(name, in string, minimum int64, exclusive bool, value any) *Validation {
 	var message string
 	if in == "" {
 		m := minIncFailNoIn
@@ -422,7 +422,7 @@ func ExceedsMinimumInt(name, in string, minimum int64, exclusive bool, value int
 }
 
 // ExceedsMinimumUint error for when minimum validation fails
-func ExceedsMinimumUint(name, in string, minimum uint64, exclusive bool, value interface{}) *Validation {
+func ExceedsMinimumUint(name, in string, minimum uint64, exclusive bool, value any) *Validation {
 	var message string
 	if in == "" {
 		m := minIncFailNoIn
@@ -447,7 +447,7 @@ func ExceedsMinimumUint(name, in string, minimum uint64, exclusive bool, value i
 }
 
 // ExceedsMinimum error for when minimum validation fails
-func ExceedsMinimum(name, in string, minimum float64, exclusive bool, value interface{}) *Validation {
+func ExceedsMinimum(name, in string, minimum float64, exclusive bool, value any) *Validation {
 	var message string
 	if in == "" {
 		m := minIncFailNoIn
@@ -472,7 +472,7 @@ func ExceedsMinimum(name, in string, minimum float64, exclusive bool, value inte
 }
 
 // NotMultipleOf error for when multiple of validation fails
-func NotMultipleOf(name, in string, multiple, value interface{}) *Validation {
+func NotMultipleOf(name, in string, multiple, value any) *Validation {
 	var msg string
 	if in == "" {
 		msg = fmt.Sprintf(multipleOfFailNoIn, name, multiple)
@@ -489,7 +489,7 @@ func NotMultipleOf(name, in string, multiple, value interface{}) *Validation {
 }
 
 // EnumFail error for when an enum validation fails
-func EnumFail(name, in string, value interface{}, values []interface{}) *Validation {
+func EnumFail(name, in string, value any, values []any) *Validation {
 	var msg string
 	if in == "" {
 		msg = fmt.Sprintf(enumFailNoIn, name, values)
@@ -508,7 +508,7 @@ func EnumFail(name, in string, value interface{}, values []interface{}) *Validat
 }
 
 // Required error for when a value is missing
-func Required(name, in string, value interface{}) *Validation {
+func Required(name, in string, value any) *Validation {
 	var msg string
 	if in == "" {
 		msg = fmt.Sprintf(requiredFailNoIn, name)
@@ -525,7 +525,7 @@ func Required(name, in string, value interface{}) *Validation {
 }
 
 // ReadOnly error for when a value is present in request
-func ReadOnly(name, in string, value interface{}) *Validation {
+func ReadOnly(name, in string, value any) *Validation {
 	var msg string
 	if in == "" {
 		msg = fmt.Sprintf(readOnlyFailNoIn, name)
@@ -542,7 +542,7 @@ func ReadOnly(name, in string, value interface{}) *Validation {
 }
 
 // TooLong error for when a string is too long
-func TooLong(name, in string, maximum int64, value interface{}) *Validation {
+func TooLong(name, in string, maximum int64, value any) *Validation {
 	var msg string
 	if in == "" {
 		msg = fmt.Sprintf(tooLongMessageNoIn, name, maximum)
@@ -559,7 +559,7 @@ func TooLong(name, in string, maximum int64, value interface{}) *Validation {
 }
 
 // TooShort error for when a string is too short
-func TooShort(name, in string, minimum int64, value interface{}) *Validation {
+func TooShort(name, in string, minimum int64, value any) *Validation {
 	var msg string
 	if in == "" {
 		msg = fmt.Sprintf(tooShortMessageNoIn, name, minimum)
@@ -578,7 +578,7 @@ func TooShort(name, in string, minimum int64, value interface{}) *Validation {
 
 // FailedPattern error for when a string fails a regex pattern match
 // the pattern that is returned is the ECMA syntax version of the pattern not the golang version.
-func FailedPattern(name, in, pattern string, value interface{}) *Validation {
+func FailedPattern(name, in, pattern string, value any) *Validation {
 	var msg string
 	if in == "" {
 		msg = fmt.Sprintf(patternFailNoIn, name, pattern)
@@ -597,7 +597,7 @@ func FailedPattern(name, in, pattern string, value interface{}) *Validation {
 
 // MultipleOfMustBePositive error for when a
 // multipleOf factor is negative
-func MultipleOfMustBePositive(name, in string, factor interface{}) *Validation {
+func MultipleOfMustBePositive(name, in string, factor any) *Validation {
 	return &Validation{
 		code:    MultipleOfMustBePositiveCode,
 		Name:    name,

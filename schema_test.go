@@ -8,8 +8,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/go-openapi/testify/v2/assert"
+	"github.com/go-openapi/testify/v2/require"
 )
 
 //nolint:maintidx
@@ -265,13 +265,13 @@ func TestSchemaErrors(t *testing.T) {
 	})
 
 	t.Run("with EnumFail", func(t *testing.T) {
-		err := EnumFail("something", "query", "yada", []interface{}{"hello", "world"})
+		err := EnumFail("something", "query", "yada", []any{"hello", "world"})
 		require.Error(t, err)
 		assert.EqualValues(t, EnumFailCode, err.Code())
 		assert.Equal(t, "something in query should be one of [hello world]", err.Error())
 		assert.Equal(t, "yada", err.Value)
 
-		err = EnumFail("something", "", "yada", []interface{}{"hello", "world"})
+		err = EnumFail("something", "", "yada", []any{"hello", "world"})
 		require.Error(t, err)
 		assert.EqualValues(t, EnumFailCode, err.Code())
 		assert.Equal(t, "something should be one of [hello world]", err.Error())
