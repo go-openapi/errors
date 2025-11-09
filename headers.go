@@ -14,9 +14,9 @@ type Validation struct { //nolint: errname
 	code    int32
 	Name    string
 	In      string
-	Value   interface{}
+	Value   any
 	message string
-	Values  []interface{}
+	Values  []any
 }
 
 func (e *Validation) Error() string {
@@ -30,7 +30,7 @@ func (e *Validation) Code() int32 {
 
 // MarshalJSON implements the JSON encoding interface
 func (e Validation) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"code":    e.code,
 		"message": e.message,
 		"in":      e.In,
@@ -61,7 +61,7 @@ const (
 
 // InvalidContentType error for an invalid content type
 func InvalidContentType(value string, allowed []string) *Validation {
-	values := make([]interface{}, 0, len(allowed))
+	values := make([]any, 0, len(allowed))
 	for _, v := range allowed {
 		values = append(values, v)
 	}
@@ -77,7 +77,7 @@ func InvalidContentType(value string, allowed []string) *Validation {
 
 // InvalidResponseFormat error for an unacceptable response format request
 func InvalidResponseFormat(value string, allowed []string) *Validation {
-	values := make([]interface{}, 0, len(allowed))
+	values := make([]any, 0, len(allowed))
 	for _, v := range allowed {
 		values = append(values, v)
 	}
