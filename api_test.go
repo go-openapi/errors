@@ -98,7 +98,7 @@ func TestServeError(t *testing.T) {
 		)
 	})
 
-	t.Run("with composite erors", func(t *testing.T) {
+	t.Run("with composite errors", func(t *testing.T) {
 		t.Run("unrecognized - return internal error with first error only - the second error is ignored", func(t *testing.T) {
 			compositeErr := &CompositeError{
 				Errors: []error{
@@ -165,6 +165,28 @@ func TestServeError(t *testing.T) {
 			assert.Equal(t, http.StatusInternalServerError, recorder.Code)
 			assert.JSONEq(t,
 				`{"code":500,"message":"Unknown error"}`,
+				recorder.Body.String(),
+			)
+		})
+
+		t.Run("check guard against nil members in a CompositeError", func(t *testing.T) {
+			compositeErr := &CompositeError{
+				Errors: []error{
+					New(600, "myApiError"),
+					nil,
+					New(601, "myOtherApiError"),
+				},
+			}
+			t.Run("flatten CompositeError should strip nil members", func(t *testing.T) {
+				flat := flattenComposite(compositeErr)
+				require.Len(t, flat.Errors, 2)
+			})
+
+			recorder := httptest.NewRecorder()
+			ServeError(recorder, nil, compositeErr)
+			assert.Equal(t, CompositeErrorCode, recorder.Code)
+			assert.JSONEq(t,
+				`{"code":600,"message":"myApiError"}`,
 				recorder.Body.String(),
 			)
 		})

@@ -402,6 +402,29 @@ new-namey is an invalid type name`
 		assert.Equal(t, expectedMessage, err.Error())
 	})
 
+	t.Run("ValidateName for a CompositeError should skip nil members", func(t *testing.T) {
+		err := CompositeValidationError(
+			InvalidContentType("text/html", []string{"application/json"}),
+			nil,
+			CompositeValidationError(
+				InvalidTypeName("z"),
+				nil,
+				errors.New("another error"),
+			),
+			errors.New("some error"),
+		)
+		mutated := err.ValidateName("another-name")
+		const expectedMessage = `validation failure list:
+another-name.unsupported media type "text/html", only [application/json] are allowed
+validation failure list:
+another-namez is an invalid type name
+another error
+some error`
+
+		require.Len(t, mutated.Errors, len(err.Errors))
+		assert.Equal(t, expectedMessage, mutated.Error())
+	})
+
 	t.Run("with PropertyNotAllowed", func(t *testing.T) {
 		err = PropertyNotAllowed("path", "body", "key")
 		require.Error(t, err)
