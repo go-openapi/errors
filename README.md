@@ -27,6 +27,13 @@ go get github.com/go-openapi/errors
 ## Basic usage
 
 ```go
+const url = "https://www.example.com/#"
+
+errGeneric := New(401,"onvalid argument: %s", url)
+
+errNotFound := NotFound("resource not found: %s", url)
+
+errNotImplemented := NotImplemented("method: %s", url)
 ```
 
 ## Change log
