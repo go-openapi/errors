@@ -144,7 +144,7 @@ Standard documentation:
 
 Reference documentation (released):
 
-* [godoc](https://pkg.go/dev/go-openapi/errors)
+* [godoc](https://pkg.go.dev/github.com/go-openapi/errors)
 
 ## TODOs & other ideas
 
