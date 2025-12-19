@@ -71,6 +71,7 @@ const (
 
 	// InvalidTypeCode is used for any subclass of invalid types.
 	InvalidTypeCode = maximumValidHTTPCode + iota
+	// RequiredFailCode indicates a required field is missing.
 	RequiredFailCode
 	TooLongFailCode
 	TooShortFailCode
@@ -98,11 +99,12 @@ type CompositeError struct {
 	message string
 }
 
-// Code for this error.
+// Code returns the HTTP status code for this composite error.
 func (c *CompositeError) Code() int32 {
 	return c.code
 }
 
+// Error implements the standard error interface.
 func (c *CompositeError) Error() string {
 	if len(c.Errors) > 0 {
 		msgs := []string{c.message + ":"}
@@ -117,6 +119,7 @@ func (c *CompositeError) Error() string {
 	return c.message
 }
 
+// Unwrap implements the [errors.Unwrap] interface.
 func (c *CompositeError) Unwrap() []error {
 	return c.Errors
 }
