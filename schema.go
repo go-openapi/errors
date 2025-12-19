@@ -337,7 +337,7 @@ func TooFewItems(name, in string, minimum int64, value any) *Validation {
 	}
 }
 
-// ExceedsMaximumInt error for when maximumimum validation fails.
+// ExceedsMaximumInt error for when maximum validation fails.
 func ExceedsMaximumInt(name, in string, maximum int64, exclusive bool, value any) *Validation {
 	var message string
 	if in == "" {
@@ -362,7 +362,7 @@ func ExceedsMaximumInt(name, in string, maximum int64, exclusive bool, value any
 	}
 }
 
-// ExceedsMaximumUint error for when maximumimum validation fails.
+// ExceedsMaximumUint error for when maximum validation fails.
 func ExceedsMaximumUint(name, in string, maximum uint64, exclusive bool, value any) *Validation {
 	var message string
 	if in == "" {
@@ -387,7 +387,7 @@ func ExceedsMaximumUint(name, in string, maximum uint64, exclusive bool, value a
 	}
 }
 
-// ExceedsMaximum error for when maximumimum validation fails.
+// ExceedsMaximum error for when maximum validation fails.
 func ExceedsMaximum(name, in string, maximum float64, exclusive bool, value any) *Validation {
 	var message string
 	if in == "" {
