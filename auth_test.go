@@ -12,5 +12,5 @@ import (
 func TestUnauthenticated(t *testing.T) {
 	err := Unauthenticated("basic")
 	assert.EqualValues(t, 401, err.Code())
-	assert.Equal(t, "unauthenticated for basic", err.Error())
+	assert.EqualT(t, "unauthenticated for basic", err.Error())
 }

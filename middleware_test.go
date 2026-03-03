@@ -18,5 +18,5 @@ func TestAPIVerificationFailed(t *testing.T) {
 
 	expected := `missing [text/html, application/xml] consumer registrations
 missing from spec file [application/json, application/x-yaml] consumer`
-	assert.Equal(t, expected, err.Error())
+	assert.EqualT(t, expected, err.Error())
 }

@@ -63,7 +63,7 @@ func ExampleServeError() {
 }
 
 func ExampleCompositeValidationError() {
-	var errs []error
+	errs := make([]error, 0, 3)
 
 	// Collect multiple validation errors
 	errs = append(errs, errors.Required("name", "body", nil))

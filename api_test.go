@@ -28,10 +28,10 @@ func TestServeError(t *testing.T) {
 
 		recorder := httptest.NewRecorder()
 		ServeError(recorder, nil, err)
-		assert.Equal(t, http.StatusMethodNotAllowed, recorder.Code)
-		assert.Equal(t, "POST,PUT", recorder.Header().Get("Allow"))
+		assert.EqualT(t, http.StatusMethodNotAllowed, recorder.Code)
+		assert.EqualT(t, "POST,PUT", recorder.Header().Get("Allow"))
 		// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
-		assert.JSONEq(t,
+		assert.JSONEqT(t,
 			`{"code":405,"message":"method GET is not allowed, but [POST,PUT] are"}`,
 			recorder.Body.String(),
 		)
@@ -43,9 +43,9 @@ func TestServeError(t *testing.T) {
 
 		recorder := httptest.NewRecorder()
 		ServeError(recorder, nil, err)
-		assert.Equal(t, http.StatusNotFound, recorder.Code)
+		assert.EqualT(t, http.StatusNotFound, recorder.Code)
 		// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
-		assert.JSONEq(t,
+		assert.JSONEqT(t,
 			`{"code":404,"message":"Not found"}`,
 			recorder.Body.String(),
 		)
@@ -58,9 +58,9 @@ func TestServeError(t *testing.T) {
 
 		recorder := httptest.NewRecorder()
 		ServeError(recorder, nil, err)
-		assert.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
+		assert.EqualT(t, http.StatusUnprocessableEntity, recorder.Code)
 		// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
-		assert.JSONEq(t,
+		assert.JSONEqT(t,
 			`{"code":601,"message":"someType is an invalid type name"}`,
 			recorder.Body.String(),
 		)
@@ -77,9 +77,9 @@ func TestServeError(t *testing.T) {
 
 			recorder := httptest.NewRecorder()
 			ServeError(recorder, nil, err)
-			assert.Equal(t, http.StatusBadRequest, recorder.Code)
+			assert.EqualT(t, http.StatusBadRequest, recorder.Code)
 			// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
-			assert.JSONEq(t,
+			assert.JSONEqT(t,
 				`{"code":601,"message":"someType is an invalid type name"}`,
 				recorder.Body.String(),
 			)
@@ -90,9 +90,9 @@ func TestServeError(t *testing.T) {
 		simpleErr := errors.New("some error")
 		recorder := httptest.NewRecorder()
 		ServeError(recorder, nil, simpleErr)
-		assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+		assert.EqualT(t, http.StatusInternalServerError, recorder.Code)
 		// assert.Equal(t, "application/json", recorder.Header().Get("content-type"))
-		assert.JSONEq(t,
+		assert.JSONEqT(t,
 			`{"code":500,"message":"some error"}`,
 			recorder.Body.String(),
 		)
@@ -108,8 +108,8 @@ func TestServeError(t *testing.T) {
 			}
 			recorder := httptest.NewRecorder()
 			ServeError(recorder, nil, compositeErr)
-			assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-			assert.JSONEq(t,
+			assert.EqualT(t, http.StatusInternalServerError, recorder.Code)
+			assert.JSONEqT(t,
 				`{"code":500,"message":"firstError"}`,
 				recorder.Body.String(),
 			)
@@ -124,8 +124,8 @@ func TestServeError(t *testing.T) {
 			}
 			recorder := httptest.NewRecorder()
 			ServeError(recorder, nil, compositeErr)
-			assert.Equal(t, CompositeErrorCode, recorder.Code)
-			assert.JSONEq(t,
+			assert.EqualT(t, CompositeErrorCode, recorder.Code)
+			assert.JSONEqT(t,
 				`{"code":600,"message":"myApiError"}`,
 				recorder.Body.String(),
 			)
@@ -144,8 +144,8 @@ func TestServeError(t *testing.T) {
 			}
 			recorder := httptest.NewRecorder()
 			ServeError(recorder, nil, compositeErr)
-			assert.Equal(t, CompositeErrorCode, recorder.Code)
-			assert.JSONEq(t,
+			assert.EqualT(t, CompositeErrorCode, recorder.Code)
+			assert.JSONEqT(t,
 				`{"code":600,"message":"myApiError"}`,
 				recorder.Body.String(),
 			)
@@ -162,8 +162,8 @@ func TestServeError(t *testing.T) {
 			}
 			recorder := httptest.NewRecorder()
 			ServeError(recorder, nil, compositeErr)
-			assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-			assert.JSONEq(t,
+			assert.EqualT(t, http.StatusInternalServerError, recorder.Code)
+			assert.JSONEqT(t,
 				`{"code":500,"message":"Unknown error"}`,
 				recorder.Body.String(),
 			)
@@ -184,8 +184,8 @@ func TestServeError(t *testing.T) {
 
 			recorder := httptest.NewRecorder()
 			ServeError(recorder, nil, compositeErr)
-			assert.Equal(t, CompositeErrorCode, recorder.Code)
-			assert.JSONEq(t,
+			assert.EqualT(t, CompositeErrorCode, recorder.Code)
+			assert.JSONEqT(t,
 				`{"code":600,"message":"myApiError"}`,
 				recorder.Body.String(),
 			)
@@ -194,8 +194,8 @@ func TestServeError(t *testing.T) {
 		t.Run("check guard against nil type", func(t *testing.T) {
 			recorder := httptest.NewRecorder()
 			ServeError(recorder, nil, nil)
-			assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-			assert.JSONEq(t,
+			assert.EqualT(t, http.StatusInternalServerError, recorder.Code)
+			assert.JSONEqT(t,
 				`{"code":500,"message":"Unknown error"}`,
 				recorder.Body.String(),
 			)
@@ -205,8 +205,8 @@ func TestServeError(t *testing.T) {
 			recorder := httptest.NewRecorder()
 			var z *customError
 			ServeError(recorder, nil, z)
-			assert.Equal(t, http.StatusInternalServerError, recorder.Code)
-			assert.JSONEq(t,
+			assert.EqualT(t, http.StatusInternalServerError, recorder.Code)
+			assert.JSONEqT(t,
 				`{"code":500,"message":"Unknown error"}`,
 				recorder.Body.String(),
 			)
@@ -218,37 +218,37 @@ func TestAPIErrors(t *testing.T) {
 	err := New(402, "this failed %s", "yada")
 	require.Error(t, err)
 	assert.EqualValues(t, 402, err.Code())
-	assert.Equal(t, "this failed yada", err.Error())
+	assert.EqualT(t, "this failed yada", err.Error())
 
 	err = NotFound("this failed %d", 1)
 	require.Error(t, err)
 	assert.EqualValues(t, http.StatusNotFound, err.Code())
-	assert.Equal(t, "this failed 1", err.Error())
+	assert.EqualT(t, "this failed 1", err.Error())
 
 	err = NotFound("")
 	require.Error(t, err)
 	assert.EqualValues(t, http.StatusNotFound, err.Code())
-	assert.Equal(t, "Not found", err.Error())
+	assert.EqualT(t, "Not found", err.Error())
 
 	err = NotImplemented("not implemented")
 	require.Error(t, err)
 	assert.EqualValues(t, http.StatusNotImplemented, err.Code())
-	assert.Equal(t, "not implemented", err.Error())
+	assert.EqualT(t, "not implemented", err.Error())
 
 	err = MethodNotAllowed("GET", []string{"POST", "PUT"})
 	require.Error(t, err)
 	assert.EqualValues(t, http.StatusMethodNotAllowed, err.Code())
-	assert.Equal(t, "method GET is not allowed, but [POST,PUT] are", err.Error())
+	assert.EqualT(t, "method GET is not allowed, but [POST,PUT] are", err.Error())
 
 	err = InvalidContentType("application/saml", []string{"application/json", "application/x-yaml"})
 	require.Error(t, err)
 	assert.EqualValues(t, http.StatusUnsupportedMediaType, err.Code())
-	assert.Equal(t, "unsupported media type \"application/saml\", only [application/json application/x-yaml] are allowed", err.Error())
+	assert.EqualT(t, "unsupported media type \"application/saml\", only [application/json application/x-yaml] are allowed", err.Error())
 
 	err = InvalidResponseFormat("application/saml", []string{"application/json", "application/x-yaml"})
 	require.Error(t, err)
 	assert.EqualValues(t, http.StatusNotAcceptable, err.Code())
-	assert.Equal(t, "unsupported media type requested, only [application/json application/x-yaml] are available", err.Error())
+	assert.EqualT(t, "unsupported media type requested, only [application/json application/x-yaml] are available", err.Error())
 }
 
 func TestValidateName(t *testing.T) {
@@ -256,13 +256,13 @@ func TestValidateName(t *testing.T) {
 
 	// unchanged
 	vv := v.ValidateName("")
-	assert.Equal(t, "myValidation", vv.Name)
-	assert.Equal(t, "myMessage", vv.message)
+	assert.EqualT(t, "myValidation", vv.Name)
+	assert.EqualT(t, "myMessage", vv.message)
 
 	// forced
 	vv = v.ValidateName("myNewName")
-	assert.Equal(t, "myNewName.myValidation", vv.Name)
-	assert.Equal(t, "myNewName.myMessage", vv.message)
+	assert.EqualT(t, "myNewName.myValidation", vv.Name)
+	assert.EqualT(t, "myNewName.myMessage", vv.message)
 
 	v.Name = ""
 	v.message = "myMessage"
@@ -270,12 +270,12 @@ func TestValidateName(t *testing.T) {
 	// unchanged
 	vv = v.ValidateName("")
 	assert.Empty(t, vv.Name)
-	assert.Equal(t, "myMessage", vv.message)
+	assert.EqualT(t, "myMessage", vv.message)
 
 	// forced
 	vv = v.ValidateName("myNewName")
-	assert.Equal(t, "myNewName", vv.Name)
-	assert.Equal(t, "myNewNamemyMessage", vv.message)
+	assert.EqualT(t, "myNewName", vv.Name)
+	assert.EqualT(t, "myNewNamemyMessage", vv.message)
 }
 
 func TestMarshalJSON(t *testing.T) {
@@ -296,25 +296,25 @@ func TestMarshalJSON(t *testing.T) {
 		`{"code":%d,"message":"%s","name":"Content-Type","in":"header","value":"%s","values":["a","b"]}`,
 		expectedCode, expectedMessage, value,
 	)
-	assert.JSONEq(t, expectedJSON, string(jazon))
+	assert.JSONEqT(t, expectedJSON, string(jazon))
 
 	a := apiError{code: 1, message: "a"}
 	jazon, err = a.MarshalJSON()
 	require.NoError(t, err)
-	assert.JSONEq(t, `{"code":1,"message":"a"}`, string(jazon))
+	assert.JSONEqT(t, `{"code":1,"message":"a"}`, string(jazon))
 
 	m := MethodNotAllowedError{code: 1, message: "a", Allowed: []string{"POST"}}
 	jazon, err = m.MarshalJSON()
 	require.NoError(t, err)
-	assert.JSONEq(t, `{"code":1,"message":"a","allowed":["POST"]}`, string(jazon))
+	assert.JSONEqT(t, `{"code":1,"message":"a","allowed":["POST"]}`, string(jazon))
 
 	c := CompositeError{Errors: []error{e}, code: 1, message: "a"}
 	jazon, err = c.MarshalJSON()
 	require.NoError(t, err)
-	assert.JSONEq(t, fmt.Sprintf(`{"code":1,"message":"a","errors":[%s]}`, expectedJSON), string(jazon))
+	assert.JSONEqT(t, fmt.Sprintf(`{"code":1,"message":"a","errors":[%s]}`, expectedJSON), string(jazon))
 
 	p := ParseError{code: 1, message: "x", Name: "a", In: "b", Value: "c", Reason: errors.New("d")}
 	jazon, err = p.MarshalJSON()
 	require.NoError(t, err)
-	assert.JSONEq(t, `{"code":1,"message":"x","name":"a","in":"b","value":"c","reason":"d"}`, string(jazon))
+	assert.JSONEqT(t, `{"code":1,"message":"x","name":"a","in":"b","value":"c","reason":"d"}`, string(jazon))
 }
